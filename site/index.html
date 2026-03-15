@@ -1107,7 +1107,7 @@ function drawColumns() {
     if (rw <= 0 || rh <= 0) continue;
 
     const fillAlpha = isDimmed ? 0.2 : (isHovered ? 0.92 : 0.75);
-    ctx.fillStyle = payColorCSS(r.pay_monthly, fillAlpha);
+    ctx.fillStyle = exposureColorCSS(r.exposure, fillAlpha);
     ctx.beginPath();
     roundRect(ctx, rx, ry, rw, rh, 2);
     ctx.fill();
@@ -1427,24 +1427,12 @@ function drawGradientLegend() {
   c.width = Math.max(60, containerW);
   const gctx = c.getContext("2d");
 
-  if (currentView === "columns") {
-    // Pay gradient
-    document.getElementById("legendMin").textContent = "Low pay";
-    document.getElementById("legendMax").textContent = "High pay";
-    for (let x = 0; x < c.width; x++) {
-      const pay = payDomain.min + (x / (c.width - 1)) * (payDomain.max - payDomain.min);
-      gctx.fillStyle = payColorCSS(pay, 1);
-      gctx.fillRect(x, 0, 1, 12);
-    }
-  } else {
-    // Exposure gradient
-    document.getElementById("legendMin").textContent = "Low";
-    document.getElementById("legendMax").textContent = "High";
-    for (let x = 0; x < c.width; x++) {
-      const score = (x / (c.width - 1)) * 10;
-      gctx.fillStyle = exposureColorCSS(score, 1);
-      gctx.fillRect(x, 0, 1, 12);
-    }
+  document.getElementById("legendMin").textContent = "Low";
+  document.getElementById("legendMax").textContent = "High";
+  for (let x = 0; x < c.width; x++) {
+    const score = (x / (c.width - 1)) * 10;
+    gctx.fillStyle = exposureColorCSS(score, 1);
+    gctx.fillRect(x, 0, 1, 12);
   }
 }
 
