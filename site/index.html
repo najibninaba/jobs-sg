@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Exposure of the Singapore Job Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #f5f5f7;
+  --bg2: #ffffff;
+  --bg3: #f0f0f4;
+  --fg: #1a1a2e;
+  --fg2: #6b6b80;
+  --fg3: #9b9baa;
+  --accent: #4a5fd7;
+  --accent2: #3b4fc8;
+  --sidebar-w: 260px;
+  --radius: 10px;
+  --border: rgba(0,0,0,0.08);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --canvas-bg: #eaeaef;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+}
+
+/* ── Sidebar ── */
+
+#sidebar {
+  position: relative;
+  flex-shrink: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 24px 20px;
+  z-index: 10;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 2px; }
+
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#sidebar h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--fg);
+}
+#sidebar .subtitle {
+  font-size: 11.5px;
+  color: var(--fg2);
+  line-height: 1.6;
+}
+#sidebar .subtitle a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+#sidebar .subtitle a:hover { color: var(--fg); }
+
+/* ── Cards ── */
+
+.stat-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow);
+  animation: fadeIn 0.3s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-card h3 {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fg3);
+  margin-bottom: -2px;
+}
+
+.stat-row {
+  display: flex;
+  gap: 10px;
+}
+.stat-row .stat-card {
+  flex: 1;
+}
+
+.stat-big {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--fg);
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--fg2);
+}
+
+/* ── Toggle ── */
+
+.size-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+.size-toggle button {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.size-toggle button.active {
+  background: var(--accent2);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59,79,200,0.25);
+}
+.size-toggle button:hover:not(.active) {
+  color: var(--fg);
+  background: rgba(0,0,0,0.04);
+}
+.size-caption {
+  font-size: 10px;
+  color: var(--fg3);
+  line-height: 1.4;
+}
+
+/* ── Tier bars ── */
+
+.tier-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.tier-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.tier-color {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+}
+.tier-name {
+  flex: 1;
+  color: var(--fg2);
+  font-weight: 500;
+}
+.tier-count {
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 700;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+.tier-pct {
+  text-align: right;
+  width: 34px;
+  color: var(--fg3);
+  font-size: 10px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Histogram ── */
+
+.histogram {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 52px;
+}
+.histogram .bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+  transition: opacity 0.15s;
+  cursor: default;
+}
+.histogram .bar:hover { opacity: 0.75; }
+.hist-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--fg3);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* ── Horizontal bar chart ── */
+
+.hbar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.hbar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.hbar-label {
+  width: 58px;
+  flex-shrink: 0;
+  color: var(--fg2);
+  font-size: 10px;
+  font-weight: 500;
+  text-align: right;
+}
+.hbar-track {
+  flex: 1;
+  height: 12px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.hbar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+.hbar-val {
+  width: 24px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--fg);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── View toggle ── */
+
+.view-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 3px;
+  border: 1px solid var(--border);
+}
+.view-toggle button {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.view-toggle button.active {
+  background: var(--accent2);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59,79,200,0.25);
+}
+.view-toggle button:hover:not(.active) {
+  color: var(--fg);
+  background: rgba(0,0,0,0.04);
+}
+
+/* ── Tier clickable ── */
+
+.tier-row {
+  cursor: pointer;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.tier-row:hover {
+  background: rgba(0,0,0,0.04);
+}
+.tier-row.active {
+  background: rgba(74,95,215,0.1);
+  box-shadow: inset 0 0 0 1px rgba(74,95,215,0.2);
+}
+
+/* ── Detail panel ── */
+
+#detailPanel {
+  display: none;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  animation: fadeIn 0.2s ease both;
+}
+#detailPanel.visible { display: block; }
+#detailPanel .dp-close {
+  float: right;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--fg3);
+  padding: 0 2px;
+  line-height: 1;
+  font-family: inherit;
+}
+#detailPanel .dp-close:hover { color: var(--fg); }
+#detailPanel .dp-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fg);
+  margin-bottom: 8px;
+  padding-right: 20px;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+#detailPanel .dp-exposure-bar {
+  height: 6px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 6px 0 12px;
+}
+#detailPanel .dp-exposure-bar .dp-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+#detailPanel .dp-stats {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 14px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+#detailPanel .dp-stats .label {
+  color: var(--fg3);
+  font-weight: 500;
+}
+#detailPanel .dp-stats .value {
+  text-align: right;
+  font-weight: 600;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+#detailPanel .dp-rationale {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--fg2);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+/* ── Gradient legend ── */
+
+.gradient-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--fg3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-top: 4px;
+}
+.gradient-legend canvas {
+  border-radius: 4px;
+  flex: 1;
+}
+
+/* ── Canvas ── */
+
+#canvasWrap {
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  position: relative;
+  background: var(--canvas-bg);
+}
+
+canvas#canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+}
+
+/* ── Tooltip ── */
+
+#tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 420px;
+  min-width: 290px;
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 20;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
+  color: var(--fg);
+}
+#tooltip.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+#tooltip .tt-title {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 8px;
+  color: var(--fg);
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+#tooltip .tt-exposure {
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+#tooltip .tt-stats {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  font-size: 12px;
+}
+#tooltip .tt-stats .label {
+  color: var(--fg3);
+  font-weight: 500;
+}
+#tooltip .tt-stats .value {
+  color: var(--fg);
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+#tooltip .tt-rationale {
+  font-size: 11.5px;
+  color: var(--fg2);
+  margin-top: 10px;
+  line-height: 1.55;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding-top: 10px;
+}
+
+/* ── Mobile ── */
+
+#menuToggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 30;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg);
+  font-size: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#sidebarOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 9;
+}
+
+@media (max-width: 768px) {
+  body { display: block; }
+  #sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  #sidebar.open { transform: translateX(0); }
+  #sidebarOverlay.open { display: block; }
+  #menuToggle { display: flex; }
+  #canvasWrap { width: 100vw; height: 100vh; }
+}
+</style>
+</head>
+<body>
+
+<button id="menuToggle" onclick="toggleSidebar()">☰</button>
+<div id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h1>AI Exposure of the Singapore Job Market</h1>
+    <div class="subtitle" id="subtitleText">Loading…</div>
+  </div>
+
+  <div class="stat-card">
+    <h3>View</h3>
+    <div class="view-toggle">
+      <button class="active" onclick="setView('treemap')">Treemap</button>
+      <button onclick="setView('columns')">Exposure vs Pay</button>
+    </div>
+  </div>
+
+  <div class="stat-card" id="sizeCard">
+    <h3>Tile size</h3>
+    <div class="size-toggle">
+      <button class="active" onclick="setSizeMode('equal')">Equal</button>
+      <button onclick="setSizeMode('pay')">Pay-weighted</button>
+    </div>
+    <div class="size-caption">Equal area, or weighted by monthly median pay</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <h3>Occupations</h3>
+      <div class="stat-big" id="statTotal">—</div>
+    </div>
+    <div class="stat-card">
+      <h3>Avg exposure</h3>
+      <div class="stat-big" id="statAvgExposure">—</div>
+      <div class="stat-label">0–10 scale</div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <h3>Distribution</h3>
+    <div class="histogram" id="histogram"></div>
+    <div class="hist-labels"><span>0</span><span>5</span><span>10</span></div>
+  </div>
+
+  <div class="stat-card">
+    <h3>Breakdown</h3>
+    <div class="tier-bar" id="tierBar"></div>
+  </div>
+
+  <div class="stat-card">
+    <h3>Exposure by pay</h3>
+    <div class="hbar-chart" id="payChart"></div>
+  </div>
+
+  <div class="stat-card">
+    <h3>High exposure</h3>
+    <div class="stat-big" id="statHighExposure">—</div>
+    <div class="stat-label">occupations scoring ≥ 7</div>
+  </div>
+
+  <div id="detailPanel">
+    <button class="dp-close" onclick="closeDetail()">×</button>
+    <div class="dp-title"></div>
+    <div class="dp-exposure-bar"><div class="dp-fill"></div></div>
+    <div class="dp-stats"></div>
+    <div class="dp-rationale"></div>
+  </div>
+
+  <div class="gradient-legend">
+    <span id="legendMin">Low</span>
+    <canvas id="gradientLegend" height="12"></canvas>
+    <span id="legendMax">High</span>
+  </div>
+</div>
+
+<div id="canvasWrap">
+  <canvas id="canvas"></canvas>
+</div>
+
+<div id="tooltip">
+  <div class="tt-title"></div>
+  <div class="tt-exposure"></div>
+  <div class="tt-stats"></div>
+  <div class="tt-rationale"></div>
+</div>
+
+<script>
+
+// ── Exposure color scale (brighter for light mode) ───────────────────
+
+function exposureColor(score) {
+  if (score == null) return [170, 170, 180];
+  const t = Math.max(0, Math.min(10, score)) / 10;
+  let r, g, b;
+  if (t < 0.5) {
+    const s = t / 0.5;
+    r = Math.round(50 + s * 160);
+    g = Math.round(170 - s * 10);
+    b = Math.round(80 - s * 30);
+  } else {
+    const s = (t - 0.5) / 0.5;
+    r = Math.round(210 + s * 40);
+    g = Math.round(160 - s * 110);
+    b = Math.round(50 - s * 20);
+  }
+  return [r, g, b];
+}
+
+function exposureColorCSS(score, alpha) {
+  const [r, g, b] = exposureColor(score);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ── Pay color scale (green = high pay, red = low pay) ─────────────────
+
+let payDomain = { min: 0, max: 1 };
+
+function payColor(pay) {
+  if (pay == null || pay <= 0) return [170, 170, 180];
+  const range = payDomain.max - payDomain.min;
+  const t = range > 0 ? Math.max(0, Math.min(1, (pay - payDomain.min) / range)) : 0.5;
+  let r, g, b;
+  if (t < 0.5) {
+    const s = t / 0.5;
+    r = Math.round(220 - s * 50);
+    g = Math.round(75 + s * 100);
+    b = Math.round(60 - s * 15);
+  } else {
+    const s = (t - 0.5) / 0.5;
+    r = Math.round(170 - s * 120);
+    g = Math.round(175 + s * 15);
+    b = Math.round(45 + s * 35);
+  }
+  return [r, g, b];
+}
+
+function payColorCSS(pay, alpha) {
+  const [r, g, b] = payColor(pay);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ── Squarified treemap ───────────────────────────────────────────────
+
+function squarify(items, x, y, w, h) {
+  if (items.length === 0) return [];
+  if (items.length === 1) {
+    return [{ ...items[0], rx: x, ry: y, rw: w, rh: h }];
+  }
+  const total = items.reduce((s, d) => s + d.value, 0);
+  if (total === 0) return [];
+  const results = [];
+  let remaining = [...items];
+  let cx = x, cy = y, cw = w, ch = h;
+  while (remaining.length > 0) {
+    const remTotal = remaining.reduce((s, d) => s + d.value, 0);
+    const vertical = cw >= ch;
+    const side = vertical ? ch : cw;
+    let row = [remaining[0]];
+    let rowSum = remaining[0].value;
+    for (let i = 1; i < remaining.length; i++) {
+      const candidate = [...row, remaining[i]];
+      const candidateSum = rowSum + remaining[i].value;
+      if (worstAspect(candidate, candidateSum, side, remTotal, vertical ? cw : ch) <
+          worstAspect(row, rowSum, side, remTotal, vertical ? cw : ch)) {
+        row = candidate;
+        rowSum = candidateSum;
+      } else break;
+    }
+    const rowFraction = rowSum / remTotal;
+    const rowThickness = vertical ? cw * rowFraction : ch * rowFraction;
+    let offset = 0;
+    for (const item of row) {
+      const itemFraction = item.value / rowSum;
+      const itemLength = side * itemFraction;
+      if (vertical) {
+        results.push({ ...item, rx: cx, ry: cy + offset, rw: rowThickness, rh: itemLength });
+      } else {
+        results.push({ ...item, rx: cx + offset, ry: cy, rw: itemLength, rh: rowThickness });
+      }
+      offset += itemLength;
+    }
+    if (vertical) { cx += rowThickness; cw -= rowThickness; }
+    else { cy += rowThickness; ch -= rowThickness; }
+    remaining = remaining.slice(row.length);
+  }
+  return results;
+}
+
+function worstAspect(row, rowSum, side, totalArea, availableExtent) {
+  const rowExtent = availableExtent * (rowSum / totalArea);
+  if (rowExtent === 0) return Infinity;
+  let worst = 0;
+  for (const item of row) {
+    const itemLen = side * (item.value / rowSum);
+    if (itemLen === 0) continue;
+    const aspect = Math.max(rowExtent / itemLen, itemLen / rowExtent);
+    if (aspect > worst) worst = aspect;
+  }
+  return worst;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────
+
+function treemapValue(d) {
+  if (sizeMode === "equal") return 1;
+  return d.pay_monthly > 0 ? d.pay_monthly : 1;
+}
+
+function formatPay(n) {
+  if (n == null) return "\u2014";
+  return "S$" + n.toLocaleString();
+}
+
+function formatPayRange(p25, p75) {
+  if (p25 == null || p75 == null) return "\u2014";
+  return "S$" + p25.toLocaleString() + " \u2013 S$" + p75.toLocaleString();
+}
+
+// ── State ─────────────────────────────────────────────────────────────
+
+let data = [];
+let rects = [];
+let catRectsMeta = [];
+let colRects = [];
+let columnMeta = null;
+let hovered = null;
+let sizeMode = "equal";
+let currentView = "treemap";
+let selectedTier = null;
+let selectedOccupation = null;
+
+const canvasWrap = document.getElementById("canvasWrap");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let dpr = window.devicePixelRatio || 1;
+
+const MARGIN = 12;
+const GAP = 2;
+const CAT_LABEL_H = 24;
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+function setSizeMode(mode) {
+  if (mode === sizeMode) return;
+  sizeMode = mode;
+  document.querySelectorAll(".size-toggle button").forEach(b => b.classList.remove("active"));
+  document.querySelector(`.size-toggle button[onclick="setSizeMode('${mode}')"]`).classList.add("active");
+  hovered = null;
+  hideTooltip();
+  resize();
+}
+
+function setView(view) {
+  if (view === currentView) return;
+  currentView = view;
+  document.querySelectorAll(".view-toggle button").forEach(b => b.classList.remove("active"));
+  document.querySelector(`.view-toggle button[onclick="setView('${view}')"]`).classList.add("active");
+  document.getElementById("sizeCard").style.display = view === "treemap" ? "" : "none";
+  hovered = null;
+  selectedTier = null;
+  hideTooltip();
+  drawGradientLegend();
+  resize();
+}
+
+// ── Layout ────────────────────────────────────────────────────────────
+
+function layout() {
+  const w = canvasWrap.clientWidth;
+  const h = canvasWrap.clientHeight;
+
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+
+  const tx = MARGIN, ty = MARGIN;
+  const tw = w - MARGIN * 2, th = h - MARGIN * 2;
+
+  const byGroup = {};
+  for (const d of data) {
+    const g = d.major_group;
+    if (!byGroup[g]) byGroup[g] = { majorGroup: g, category: d.category, categoryLabel: d.category_label, items: [] };
+    byGroup[g].items.push(d);
+  }
+
+  const categories = Object.values(byGroup)
+    .sort((a, b) => a.majorGroup - b.majorGroup)
+    .map(grp => {
+      grp.items.sort((a, b) => treemapValue(b) - treemapValue(a));
+      return { ...grp, value: grp.items.reduce((s, d) => s + treemapValue(d), 0) };
+    });
+
+  const outerCatRects = squarify(categories, tx, ty, tw, th);
+  catRectsMeta = outerCatRects;
+
+  rects = [];
+  for (const cr of outerCatRects) {
+    const showLabel = cr.rw > 70 && cr.rh > 50;
+    const labelH = showLabel ? CAT_LABEL_H : GAP;
+    const items = cr.items.map(d => ({ ...d, value: treemapValue(d) }));
+    const innerRects = squarify(items,
+      cr.rx + GAP, cr.ry + labelH,
+      cr.rw - GAP * 2, cr.rh - labelH - GAP
+    );
+    for (const ir of innerRects) rects.push(ir);
+  }
+}
+
+// ── Draw ──────────────────────────────────────────────────────────────
+
+function draw() {
+  const w = canvas.width, h = canvas.height;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // Light background
+  ctx.fillStyle = "#eaeaef";
+  ctx.fillRect(0, 0, w / dpr, h / dpr);
+
+  // Category group backgrounds & labels
+  for (const cr of catRectsMeta) {
+    const g = GAP / 2;
+    const rx = cr.rx + g, ry = cr.ry + g;
+    const rw = cr.rw - g * 2, rh = cr.rh - g * 2;
+    if (rw <= 0 || rh <= 0) continue;
+
+    // Group background
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.beginPath();
+    roundRect(ctx, rx, ry, rw, rh, 6);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0,0,0,0.06)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    roundRect(ctx, rx, ry, rw, rh, 6);
+    ctx.stroke();
+
+    // Group label
+    if (rw > 70 && rh > 50) {
+      const rawLabel = (cr.categoryLabel || cr.category).toUpperCase();
+      const ABBREV = {
+        'ASSOCIATE PROFESSIONALS AND TECHNICIANS': 'ASSOC. PROF. & TECH.',
+        'CLERICAL SUPPORT WORKERS': 'CLERICAL SUPPORT',
+        'SERVICE AND SALES WORKERS': 'SERVICE & SALES',
+        'AGRICULTURAL AND FISHERY WORKERS': 'AGRI. & FISHERY',
+        'CRAFTSMEN AND RELATED TRADES WORKERS': 'CRAFTSMEN & TRADES',
+        'PLANT AND MACHINE OPERATORS AND ASSEMBLERS': 'PLANT & MACHINE OPS',
+        'CLEANERS, LABOURERS AND RELATED WORKERS': 'CLEANERS & LABOURERS',
+      };
+      const label = ABBREV[rawLabel] || rawLabel;
+      ctx.font = "700 10px 'Inter', system-ui, sans-serif";
+      const maxTextW = rw - 20;
+      let displayLabel = label;
+      if (ctx.measureText(displayLabel).width > maxTextW) {
+        while (ctx.measureText(displayLabel + '\u2026').width > maxTextW && displayLabel.length > 2) {
+          displayLabel = displayLabel.slice(0, -1);
+        }
+        displayLabel += '\u2026';
+      }
+      const textW = ctx.measureText(displayLabel).width;
+      const pillX = rx + 6, pillY = ry + 4;
+      const pillW = textW + 12, pillH = 16;
+
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      ctx.beginPath();
+      roundRect(ctx, pillX, pillY, pillW, pillH, 4);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(0,0,0,0.45)";
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.fillText(displayLabel, pillX + 6, pillY + pillH / 2);
+    }
+  }
+
+  // Occupation tiles
+  for (const r of rects) {
+    const isHovered = r === hovered;
+    const isDimmed = selectedTier && !(r.exposure >= selectedTier[0] && r.exposure <= selectedTier[1]);
+    const g = GAP / 2;
+    const rx = r.rx + g, ry = r.ry + g;
+    const rw = r.rw - g * 2, rh = r.rh - g * 2;
+    if (rw <= 0 || rh <= 0) continue;
+
+    // Tile fill — more saturated in light mode
+    const fillAlpha = isDimmed ? 0.2 : (isHovered ? 0.92 : 0.75);
+    ctx.fillStyle = exposureColorCSS(r.exposure, fillAlpha);
+    ctx.beginPath();
+    roundRect(ctx, rx, ry, rw, rh, 3);
+    ctx.fill();
+
+    // Subtle border for definition
+    if (!isHovered && rw > 20 && rh > 14) {
+      ctx.strokeStyle = "rgba(0,0,0,0.08)";
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      roundRect(ctx, rx, ry, rw, rh, 3);
+      ctx.stroke();
+    }
+
+    // Hover highlight
+    if (isHovered) {
+      ctx.strokeStyle = "rgba(0,0,0,0.5)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      roundRect(ctx, rx, ry, rw, rh, 3);
+      ctx.stroke();
+      ctx.shadowColor = "rgba(0,0,0,0.1)";
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = "rgba(0,0,0,0.2)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      roundRect(ctx, rx, ry, rw, rh, 3);
+      ctx.stroke();
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+    }
+
+    // Labels
+    if (rw > 36 && rh > 14) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(rx + 3, ry + 2, rw - 6, rh - 4);
+      ctx.clip();
+
+      const fontSize = Math.min(13, Math.max(7.5, Math.min(rw / 9, rh / 3)));
+      ctx.font = `600 ${fontSize}px 'Inter', system-ui, sans-serif`;
+      ctx.textBaseline = "top";
+      ctx.textAlign = "left";
+
+      // White text with dark shadow for readability on colored tiles
+      ctx.fillStyle = "rgba(0,0,0,0.18)";
+      ctx.fillText(r.title, rx + 4.5, ry + 3.5);
+      ctx.fillStyle = isHovered ? "#fff" : "rgba(255,255,255,0.97)";
+      ctx.fillText(r.title, rx + 4, ry + 3);
+
+      if (rh > 28 && rw > 48) {
+        const info = (r.exposure != null ? r.exposure + "/10" : "") +
+                     (r.pay_monthly ? " · S$" + r.pay_monthly.toLocaleString() + "/mo" : "");
+        ctx.font = `500 ${Math.max(7.5, fontSize - 2)}px 'Inter', system-ui, sans-serif`;
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.fillText(info, rx + 4.5, ry + 4.5 + fontSize + 2);
+        ctx.fillStyle = isHovered ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.7)";
+        ctx.fillText(info, rx + 4, ry + 4 + fontSize + 2);
+      }
+
+      ctx.restore();
+    }
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+// ── Column layout (Exposure vs Pay) ───────────────────────────────────────
+
+function layoutColumns() {
+  const w = canvasWrap.clientWidth;
+  const h = canvasWrap.clientHeight;
+
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+
+  const pad = { top: 28, bottom: 28, left: 6, right: 6 };
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
+  const colGap = 3;
+  const numCols = 11;
+  const colWidth = (plotW - colGap * (numCols - 1)) / numCols;
+
+  // Bucket by exposure score
+  const buckets = Array.from({ length: 11 }, () => []);
+  for (const d of data) {
+    if (d.exposure != null && d.exposure >= 0 && d.exposure <= 10) {
+      buckets[d.exposure].push(d);
+    }
+  }
+
+  // Sort each bucket by pay descending, nulls last, title tiebreak
+  for (const bucket of buckets) {
+    bucket.sort((a, b) => {
+      const pa = a.pay_monthly || 0, pb = b.pay_monthly || 0;
+      if (pb !== pa) return pb - pa;
+      return (a.title || "").localeCompare(b.title || "");
+    });
+  }
+
+  colRects = [];
+  for (let score = 0; score <= 10; score++) {
+    const items = buckets[score];
+    if (items.length === 0) continue;
+    const cx = pad.left + score * (colWidth + colGap);
+    const rowH = plotH / items.length;
+    for (let i = 0; i < items.length; i++) {
+      colRects.push({
+        ...items[i],
+        rx: cx, ry: pad.top + i * rowH,
+        rw: colWidth, rh: rowH,
+        exposureBucket: score,
+        rowIndex: i
+      });
+    }
+  }
+
+  columnMeta = { pad, colGap, colWidth, plotW, plotH, numCols, buckets };
+}
+
+function drawColumns() {
+  const w = canvas.width, h = canvas.height;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = "#eaeaef";
+  ctx.fillRect(0, 0, w / dpr, h / dpr);
+
+  if (!columnMeta) return;
+  const { pad, colGap, colWidth, plotW, plotH, numCols, buckets } = columnMeta;
+
+  // Column headers
+  ctx.font = "700 12px 'Inter', system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  for (let score = 0; score <= 10; score++) {
+    const cx = pad.left + score * (colWidth + colGap) + colWidth / 2;
+    ctx.fillStyle = exposureColorCSS(score, 0.85);
+    ctx.fillText(score, cx, pad.top - 8);
+  }
+
+  // Column background strips
+  for (let score = 0; score <= 10; score++) {
+    const cx = pad.left + score * (colWidth + colGap);
+    ctx.fillStyle = score % 2 === 0 ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.15)";
+    ctx.beginPath();
+    roundRect(ctx, cx, pad.top, colWidth, plotH, 4);
+    ctx.fill();
+  }
+
+  // Axis label
+  ctx.fillStyle = "rgba(0,0,0,0.35)";
+  ctx.font = "600 11px 'Inter', system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText("AI Exposure →", pad.left + plotW / 2, pad.top + plotH + 8);
+
+  // Tiles
+  const gap = 1;
+  for (const r of colRects) {
+    const isHovered = r === hovered;
+    const isDimmed = selectedTier && !(r.exposure >= selectedTier[0] && r.exposure <= selectedTier[1]);
+    const rx = r.rx + gap, ry = r.ry + gap;
+    const rw = r.rw - gap * 2, rh = r.rh - gap * 2;
+    if (rw <= 0 || rh <= 0) continue;
+
+    const fillAlpha = isDimmed ? 0.2 : (isHovered ? 0.92 : 0.75);
+    ctx.fillStyle = payColorCSS(r.pay_monthly, fillAlpha);
+    ctx.beginPath();
+    roundRect(ctx, rx, ry, rw, rh, 2);
+    ctx.fill();
+
+    if (!isHovered && rw > 16 && rh > 10) {
+      ctx.strokeStyle = isDimmed ? "rgba(0,0,0,0.03)" : "rgba(0,0,0,0.08)";
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      roundRect(ctx, rx, ry, rw, rh, 2);
+      ctx.stroke();
+    }
+
+    if (isHovered) {
+      ctx.strokeStyle = "rgba(0,0,0,0.5)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      roundRect(ctx, rx, ry, rw, rh, 2);
+      ctx.stroke();
+    }
+
+    // Labels
+    if (rw > 30 && rh > 12) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(rx + 2, ry + 1, rw - 4, rh - 2);
+      ctx.clip();
+
+      const fontSize = Math.min(12, Math.max(7, Math.min(rw / 10, rh / 2.2)));
+      ctx.font = `600 ${fontSize}px 'Inter', system-ui, sans-serif`;
+      ctx.textBaseline = "top";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "rgba(0,0,0,0.15)";
+      ctx.fillText(r.title, rx + 3.5, ry + 2.5);
+      ctx.fillStyle = isHovered ? "#fff" : "rgba(255,255,255,0.95)";
+      ctx.fillText(r.title, rx + 3, ry + 2);
+
+      if (rh > 24 && rw > 40) {
+        const info = r.pay_monthly ? "S$" + r.pay_monthly.toLocaleString() + "/mo" : "";
+        ctx.font = `500 ${Math.max(7, fontSize - 2)}px 'Inter', system-ui, sans-serif`;
+        ctx.fillStyle = "rgba(0,0,0,0.12)";
+        ctx.fillText(info, rx + 3.5, ry + 3.5 + fontSize + 1);
+        ctx.fillStyle = isHovered ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.65)";
+        ctx.fillText(info, rx + 3, ry + 3 + fontSize + 1);
+      }
+
+      ctx.restore();
+    }
+  }
+}
+
+// ── Hit test ──────────────────────────────────────────────────────────────────
+
+function hitTestRects(rectList, mx, my) {
+  const rect = canvasWrap.getBoundingClientRect();
+  const cx = mx - rect.left;
+  const cy = my - rect.top;
+  for (let i = rectList.length - 1; i >= 0; i--) {
+    const r = rectList[i];
+    if (cx >= r.rx && cx < r.rx + r.rw && cy >= r.ry && cy < r.ry + r.rh) return r;
+  }
+  return null;
+}
+
+function hitTest(mx, my) {
+  return hitTestRects(rects, mx, my);
+}
+
+function hitTestColumns(mx, my) {
+  return hitTestRects(colRects, mx, my);
+}
+
+function activeHitTest(mx, my) {
+  return currentView === "treemap" ? hitTest(mx, my) : hitTestColumns(mx, my);
+}
+
+function activeDraw() {
+  currentView === "treemap" ? draw() : drawColumns();
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────
+
+function showTooltip(d, mx, my) {
+  const tt = document.getElementById("tooltip");
+  tt.querySelector(".tt-title").textContent = d.title;
+
+  const score = d.exposure != null ? d.exposure : null;
+  if (score != null) {
+    const barWidth = score * 10;
+    const color = exposureColorCSS(score, 1);
+    tt.querySelector(".tt-exposure").innerHTML =
+      `<div style="display:flex;align-items:center;justify-content:space-between;">` +
+      `<span style="color:${color};font-weight:700;font-size:14px;">AI Exposure: ${score}/10</span>` +
+      `</div>` +
+      `<div style="margin-top:4px;height:5px;background:rgba(0,0,0,0.06);border-radius:3px;overflow:hidden;">` +
+      `<div style="height:100%;width:${barWidth}%;background:linear-gradient(90deg,${exposureColorCSS(0, 0.3)},${color});border-radius:3px;"></div></div>`;
+  } else {
+    tt.querySelector(".tt-exposure").innerHTML = "";
+  }
+
+  tt.querySelector(".tt-stats").innerHTML = `
+    <span class="label">SSOC code</span><span class="value">${d.ssoc_code || '\u2014'}</span>
+    <span class="label">Median monthly pay</span><span class="value">${formatPay(d.pay_monthly)}</span>
+    <span class="label">Pay range (p25\u2013p75)</span><span class="value">${formatPayRange(d.pay_p25, d.pay_p75)}</span>
+    <span class="label">Major group</span><span class="value">${d.category_label || '\u2014'}</span>
+  `;
+
+  const rationale = d.exposure_rationale || "";
+  const rationaleEl = tt.querySelector(".tt-rationale");
+  if (rationale) {
+    rationaleEl.textContent = rationale;
+    rationaleEl.style.display = "";
+  } else {
+    rationaleEl.textContent = "";
+    rationaleEl.style.display = "none";
+  }
+
+  const pad = 16;
+  let tx = mx + pad, ty = my - pad;
+  if (tx + 420 > window.innerWidth) tx = mx - 420 - pad;
+  if (ty < 10) ty = my + pad;
+  if (ty + 280 > window.innerHeight) ty = my - 280;
+  tt.style.left = tx + "px";
+  tt.style.top = ty + "px";
+  tt.classList.add("visible");
+}
+
+function hideTooltip() {
+  document.getElementById("tooltip").classList.remove("visible");
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────
+
+function computeStats() {
+  const total = data.length;
+  let sum = 0, count = 0;
+  for (const d of data) {
+    if (d.exposure != null) { sum += d.exposure; count++; }
+  }
+  const avgExposure = count > 0 ? sum / count : 0;
+
+  const histogram = new Array(11).fill(0);
+  for (const d of data) {
+    if (d.exposure != null) histogram[d.exposure]++;
+  }
+
+  const tiers = [
+    { name: "Minimal", range: [0, 1], color: exposureColorCSS(0.5, 1) },
+    { name: "Low", range: [2, 3], color: exposureColorCSS(2.5, 1) },
+    { name: "Moderate", range: [4, 5], color: exposureColorCSS(4.5, 1) },
+    { name: "High", range: [6, 7], color: exposureColorCSS(6.5, 1) },
+    { name: "Very high", range: [8, 10], color: exposureColorCSS(9, 1) },
+  ];
+  for (const tier of tiers) {
+    tier.count = 0;
+    for (const d of data) {
+      if (d.exposure != null && d.exposure >= tier.range[0] && d.exposure <= tier.range[1]) tier.count++;
+    }
+    tier.pct = total > 0 ? (tier.count / total * 100) : 0;
+  }
+
+  let highExposure = 0;
+  for (const d of data) {
+    if (d.exposure != null && d.exposure >= 7) highExposure++;
+  }
+
+  document.getElementById("statTotal").textContent = total;
+  document.getElementById("statAvgExposure").innerHTML =
+    `<span style="color:${exposureColorCSS(avgExposure, 1)}">${avgExposure.toFixed(1)}</span>`;
+
+  const maxHist = Math.max(...histogram);
+  document.getElementById("histogram").innerHTML = histogram.map((c, i) => {
+    const h = maxHist > 0 ? (c / maxHist * 100) : 0;
+    return `<div class="bar" style="height:${Math.max(3, h)}%;background:${exposureColorCSS(i, 0.9)}" title="${i}: ${c} occupations"></div>`;
+  }).join("");
+
+  document.getElementById("tierBar").innerHTML = tiers.map(t =>
+    `<div class="tier-row" onclick="toggleTier(${t.range[0]},${t.range[1]})" data-lo="${t.range[0]}" data-hi="${t.range[1]}">
+      <div class="tier-color" style="background:${t.color}"></div>
+      <span class="tier-name">${t.name} (${t.range[0]}-${t.range[1]})</span>
+      <span class="tier-count">${t.count}</span>
+      <span class="tier-pct">${t.pct.toFixed(0)}%</span>
+    </div>`
+  ).join("");
+
+  const payBands = [
+    { label: "<S$2K", min: 0, max: 2000 },
+    { label: "S$2\u20134K", min: 2000, max: 4000 },
+    { label: "S$4\u20136K", min: 4000, max: 6000 },
+    { label: "S$6\u201310K", min: 6000, max: 10000 },
+    { label: "S$10K+", min: 10000, max: Infinity },
+  ];
+  document.getElementById("payChart").innerHTML = payBands.map(band => {
+    let wSum = 0, wCount = 0;
+    for (const d of data) {
+      if (d.exposure != null && d.pay_monthly != null &&
+          d.pay_monthly >= band.min && d.pay_monthly < band.max) {
+        wSum += d.exposure; wCount++;
+      }
+    }
+    const avg = wCount > 0 ? wSum / wCount : 0;
+    const pct = avg / 10 * 100;
+    return `<div class="hbar-row">
+      <span class="hbar-label">${band.label}</span>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${exposureColorCSS(avg, 0.9)}"></div></div>
+      <span class="hbar-val">${avg.toFixed(1)}</span>
+    </div>`;
+  }).join("");
+
+  document.getElementById("statHighExposure").textContent = highExposure;
+}
+
+// ── Tier highlighting (6f) ───────────────────────────────────────────────
+
+function toggleTier(lo, hi) {
+  if (selectedTier && selectedTier[0] === lo && selectedTier[1] === hi) {
+    selectedTier = null;
+  } else {
+    selectedTier = [lo, hi];
+  }
+  // Update tier-row active state
+  document.querySelectorAll(".tier-row").forEach(row => {
+    const rlo = parseInt(row.dataset.lo), rhi = parseInt(row.dataset.hi);
+    row.classList.toggle("active", selectedTier && selectedTier[0] === rlo && selectedTier[1] === rhi);
+  });
+  activeDraw();
+}
+
+// ── Detail panel (6h) ─────────────────────────────────────────────────
+
+function showDetail(d) {
+  selectedOccupation = d;
+  const panel = document.getElementById("detailPanel");
+  panel.querySelector(".dp-title").textContent = d.title;
+
+  const score = d.exposure != null ? d.exposure : null;
+  if (score != null) {
+    const color = exposureColorCSS(score, 1);
+    const pct = score * 10;
+    panel.querySelector(".dp-exposure-bar").style.display = "";
+    panel.querySelector(".dp-fill").style.width = pct + "%";
+    panel.querySelector(".dp-fill").style.background = `linear-gradient(90deg, ${exposureColorCSS(0, 0.4)}, ${color})`;
+  } else {
+    panel.querySelector(".dp-exposure-bar").style.display = "none";
+  }
+
+  panel.querySelector(".dp-stats").innerHTML = `
+    <span class="label">AI Exposure</span><span class="value" style="color:${score != null ? exposureColorCSS(score, 1) : 'inherit'}">${score != null ? score + '/10' : '\u2014'}</span>
+    <span class="label">SSOC code</span><span class="value">${d.ssoc_code || '\u2014'}</span>
+    <span class="label">Median monthly</span><span class="value">${formatPay(d.pay_monthly)}</span>
+    <span class="label">Pay range</span><span class="value">${formatPayRange(d.pay_p25, d.pay_p75)}</span>
+    <span class="label">Annual estimate</span><span class="value">${d.pay_annual ? 'S$' + d.pay_annual.toLocaleString() : '\u2014'}</span>
+    <span class="label">Major group</span><span class="value">${d.category_label || '\u2014'}</span>
+  `;
+
+  const rationale = d.exposure_rationale || "";
+  const rationaleEl = panel.querySelector(".dp-rationale");
+  if (rationale) {
+    rationaleEl.textContent = rationale;
+    rationaleEl.style.display = "";
+  } else {
+    rationaleEl.textContent = "";
+    rationaleEl.style.display = "none";
+  }
+
+  panel.classList.add("visible");
+}
+
+function closeDetail() {
+  selectedOccupation = null;
+  document.getElementById("detailPanel").classList.remove("visible");
+}
+
+// ── Events ────────────────────────────────────────────────────────────────
+
+canvas.addEventListener("mousemove", (e) => {
+  const hit = activeHitTest(e.clientX, e.clientY);
+  if (hit !== hovered) { hovered = hit; activeDraw(); }
+  if (hovered) {
+    showTooltip(hovered, e.clientX, e.clientY);
+    canvas.style.cursor = "pointer";
+  } else {
+    hideTooltip();
+    canvas.style.cursor = "default";
+  }
+});
+
+canvas.addEventListener("click", (e) => {
+  const hit = activeHitTest(e.clientX, e.clientY);
+  if (hit) {
+    showTooltip(hit, e.clientX, e.clientY);
+    showDetail(hit);
+  }
+});
+
+canvas.addEventListener("mouseleave", () => {
+  hovered = null;
+  hideTooltip();
+  activeDraw();
+});
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  if (currentView === "treemap") {
+    layout();
+    draw();
+  } else {
+    layoutColumns();
+    drawColumns();
+  }
+}
+
+// ── Gradient legend ──────────────────────────────────────────────────────
+
+function drawGradientLegend() {
+  const c = document.getElementById("gradientLegend");
+  const containerW = c.parentElement.clientWidth - 70;
+  c.width = Math.max(60, containerW);
+  const gctx = c.getContext("2d");
+
+  if (currentView === "columns") {
+    // Pay gradient
+    document.getElementById("legendMin").textContent = "Low pay";
+    document.getElementById("legendMax").textContent = "High pay";
+    for (let x = 0; x < c.width; x++) {
+      const pay = payDomain.min + (x / (c.width - 1)) * (payDomain.max - payDomain.min);
+      gctx.fillStyle = payColorCSS(pay, 1);
+      gctx.fillRect(x, 0, 1, 12);
+    }
+  } else {
+    // Exposure gradient
+    document.getElementById("legendMin").textContent = "Low";
+    document.getElementById("legendMax").textContent = "High";
+    for (let x = 0; x < c.width; x++) {
+      const score = (x / (c.width - 1)) * 10;
+      gctx.fillStyle = exposureColorCSS(score, 1);
+      gctx.fillRect(x, 0, 1, 12);
+    }
+  }
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────
+
+fetch("data.json")
+  .then(r => r.json())
+  .then(d => {
+    data = d;
+
+    // Compute pay domain for color scaling
+    const validPays = data.filter(d => d.pay_monthly > 0).map(d => d.pay_monthly);
+    if (validPays.length > 0) {
+      payDomain.min = Math.min(...validPays);
+      payDomain.max = Math.max(...validPays);
+    }
+
+    document.getElementById("subtitleText").innerHTML =
+      `${data.length} occupations &middot; color = AI exposure<br>` +
+      `Data from <a href="https://stats.mom.gov.sg/">MOM</a>, scored by Claude<br>` +
+      `Adapted from <a href="https://github.com/karpathy/jobs">karpathy/jobs</a> &middot; ` +
+      `<a href="https://github.com/najibninaba/jobs-sg">GitHub</a>`;
+    computeStats();
+    drawGradientLegend();
+    resize();
+  });
+
+window.addEventListener("resize", () => { drawGradientLegend(); resize(); });
+</script>
+</body>
+</html>
