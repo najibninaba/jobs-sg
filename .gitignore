@@ -1,0 +1,26 @@
+# Data sources (not for public repo - include download URLs in README)
+data-sources/
+
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Generated intermediates
+sg_occupations.json
+sg_occupations.csv
+sg_scores.json
+
+# Generated pages
+pages/
+
+# OS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
