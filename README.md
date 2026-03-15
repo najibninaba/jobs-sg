@@ -1,6 +1,13 @@
 # AI Exposure of the Singapore Job Market
 
+[![Deploy to GitHub Pages](https://github.com/najibninaba/jobs-sg/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/najibninaba/jobs-sg/actions/workflows/deploy-pages.yml)
+[![GitHub Pages](https://img.shields.io/website?url=https%3A%2F%2Fnajibninaba.github.io%2Fjobs-sg%2F&up_message=live&down_message=not%20live&label=github%20pages)](https://najibninaba.github.io/jobs-sg/)
+[![Upstream: karpathy/jobs](https://img.shields.io/badge/upstream-karpathy%2Fjobs-blue)](https://github.com/karpathy/jobs)
+[![Python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+
 A Singapore adaptation of Andrej Karpathy's [`karpathy/jobs`](https://github.com/karpathy/jobs) project: 562 occupations from the Ministry of Manpower (MOM) wage survey, enriched with SSOC occupation metadata and scored on a 0-10 AI exposure scale.
+
+**Live demo:** <https://najibninaba.github.io/jobs-sg/>
 
 This repo reworks the original US-focused project for Singapore data while preserving the core idea of an interactive AI-exposure job-market visualization.
 
@@ -171,7 +178,9 @@ It is designed to be pasted directly into an LLM for grounded discussion without
 
 ## Deployment
 
-The site is a plain static bundle in `site/`, so it can be hosted on GitHub Pages, Vercel, Netlify, or any static host. This repo includes `.github/workflows/deploy-pages.yml`, which deploys `site/` to GitHub Pages on pushes to `main` once Pages is enabled in the repository settings.
+The site is a plain static bundle in `site/`, so it can be hosted on GitHub Pages, Vercel, Netlify, or any static host. This repo includes `.github/workflows/deploy-pages.yml`, which deploys `site/` to GitHub Pages on pushes to `main`.
+
+Current deployment: <https://najibninaba.github.io/jobs-sg/>
 
 ## Attribution
 
